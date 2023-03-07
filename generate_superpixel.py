@@ -431,7 +431,7 @@ def get_params():
     parser.add_argument('--saved_path', type=str, default='/data11/yanhe/miccai/super_pixel/slide_superpixel/tcga_crc/superpixel_num_300/')
     parser.add_argument('--vis_saved_path', type=str, default='/data11/yanhe/miccai/super_pixel/vis/tcga_crc/superpixel_num_300')
     parser.add_argument('--graph_file_saved_path', type=str, default='/data11/yanhe/miccai/super_pixel/graph_file/tcga_crc/superpixel_num_300')
-    parser.add_argument('--nr_superpixels', type=int, default=300)   #分割超像素的个数
+    parser.add_argument('--nr_superpixels', type=int, default=300)  
 
     args, _ = parser.parse_known_args()
     return args

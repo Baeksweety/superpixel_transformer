@@ -25,14 +25,14 @@ import joblib
 import cv2
 
 
-#将质心坐标在背景上的超像素去掉
+#remove background
 def get_node_centroids(instance_map: np.ndarray,raw_image:np.ndarray):
 #     print(instance_map)
     regions = regionprops(instance_map)
     mask_value=1
 #     centroids = np.empty((len(regions), 2))
     for i, region in enumerate(regions):
-        center_y, center_x = region.centroid  # (y, x)   #质心在背景上则去掉
+        center_y, center_x = region.centroid  # (y, x)  
 #         print(i)
 #         print(region.coords)
         center_x = int(round(center_x))
@@ -101,7 +101,7 @@ def generate_superpixel(image_path,downsampling_factor):
     superpixels = get_node_centroids(superpixels,image)
     return superpixels
 
-#将只有一个patch或是没有patch的超像素去掉
+
 def modify_superpixels(superpixel_patchnum,instance_map):
     regions = regionprops(instance_map)
     mask_value=1
@@ -120,7 +120,7 @@ def modify_superpixels(superpixel_patchnum,instance_map):
     return instance_map
 
 
-#求矩阵的最大值
+
 def get_max_value(data_matrix):
     new_data=[]
     for i in range(len(data_matrix)):
@@ -128,7 +128,7 @@ def get_max_value(data_matrix):
     return max(new_data)
 
 
-#最高分辨率为40x的处理
+
 def patch_judge_40x(stitch_path,saved_path):
     _, image_name = os.path.split(stitch_path)
     name = image_name[:-4]
@@ -148,10 +148,10 @@ def patch_judge_40x(stitch_path,saved_path):
         patch_info['features']=f['features'][i]
         patch_coords=f['coords'][i]
 #         x,y=slide_info[i]['coords']
-        x,y=patch_coords #获取的是patch左上角的坐标
+        x,y=patch_coords 
         x=x+512
-        y=y+512   #获取patch中心的坐标
-        x=int(x/16)   #16根据openslide降采样比例算得
+        y=y+512   
+        x=int(x/16)   
         y=int(y/16)
         if (y<h)&(x<w):
             patch_info['superpixel']=superpixels[y][x]
@@ -181,7 +181,7 @@ def patch_judge_40x(stitch_path,saved_path):
     max_superpixel = get_max_value(superpixels)
 #     print(max(superpixel))
     print(max_superpixel)
-    for sup_value in range(1,max_superpixel+1):   #value为0表示背景，故直接去掉
+    for sup_value in range(1,max_superpixel+1):   
 #             print(sup_value)
         coords_s=[]
         features_s=[]
@@ -203,10 +203,10 @@ def patch_judge_40x(stitch_path,saved_path):
         patch_info['features']=f['features'][i]
         patch_coords=f['coords'][i]
 #         x,y=slide_info[i]['coords']
-        x,y=patch_coords #获取的是patch左上角的坐标
+        x,y=patch_coords 
         x=x+512
-        y=y+512   #获取patch中心的坐标
-        x=int(x/16)   #16根据openslide降采样比例算得
+        y=y+512   
+        x=int(x/16)   
         y=int(y/16)
         if (y<h)&(x<w):
             patch_info['superpixel']=superpixels[y][x]
@@ -235,7 +235,7 @@ def patch_judge_40x(stitch_path,saved_path):
     torch.save(wsi_info,new_slide_info_path)
     return superpixels    
 
-#最高分辨率为20x的处理
+
 def patch_judge_20x(stitch_path,saved_path):
     _, image_name = os.path.split(stitch_path)
     name = image_name[:-4]
@@ -260,10 +260,10 @@ def patch_judge_20x(stitch_path,saved_path):
         patch_info['features']=f['features'][i]
         patch_coords=f['coords'][i]
 #         x,y=slide_info[i]['coords']
-        x,y=patch_coords #获取的是patch左上角的坐标
+        x,y=patch_coords 
         x=x+256
-        y=y+256   #获取patch中心的坐标
-        x=int(x/16)   #16根据openslide降采样比例算得
+        y=y+256   
+        x=int(x/16)   
         y=int(y/16)
         if (y<h)&(x<w):
             patch_info['superpixel']=superpixels[y][x]
@@ -293,7 +293,7 @@ def patch_judge_20x(stitch_path,saved_path):
     max_superpixel = get_max_value(superpixels)
 #     print(max(superpixel))
     print(max_superpixel)
-    for sup_value in range(1,max_superpixel+1):   #value为0表示背景，故直接去掉
+    for sup_value in range(1,max_superpixel+1):   
 #             print(sup_value)
         coords_s=[]
         features_s=[]
@@ -316,10 +316,10 @@ def patch_judge_20x(stitch_path,saved_path):
         patch_info['features']=f['features'][i]
         patch_coords=f['coords'][i]
 #         x,y=slide_info[i]['coords']
-        x,y=patch_coords #获取的是patch左上角的坐标
+        x,y=patch_coords 
         x=x+256
-        y=y+256   #获取patch中心的坐标
-        x=int(x/16)   #16根据openslide降采样比例算得
+        y=y+256   
+        x=int(x/16)   
         y=int(y/16)
         if (y<h)&(x<w):
             patch_info['superpixel']=superpixels[y][x]
@@ -409,12 +409,12 @@ def main(args):
     os.makedirs(saved_path,exist_ok=True)
     os.makedirs(graph_file_saved_path,exist_ok=True)
     os.makedirs(vis_saved_path,exist_ok=True)
-    #处理20x的超像素
+    #20x
     slide_20x_path = args.slide_20x_path
     stitch_20x_path = args.stitch_20x_path
     generate_tissue_graph(slide_20x_path,stitch_20x_path,saved_path,graph_file_saved_path,vis_saved_path)
 
-    #处理40x的超像素
+    #40x
     slide_40x_path = args.slide_40x_path
     stitch_40x_path = args.stitch_40x_path
     generate_tissue_graph(slide_40x_path,stitch_40x_path,saved_path,graph_file_saved_path,vis_saved_path)
@@ -422,7 +422,7 @@ def main(args):
 
 
 def get_params():
-    parser = argparse.ArgumentParser(description='mae-pretrain')
+    parser = argparse.ArgumentParser(description='superpixel_generate')
 
     parser.add_argument('--slide_40x_path', type=str, default='/data12/yanhe/miccai/data/tcga_crc/slide_40x_list.pkl')
     parser.add_argument('--slide_20x_path', type=str, default='/data12/yanhe/miccai/data/tcga_crc/slide_20x_list.pkl')

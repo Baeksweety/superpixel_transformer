@@ -622,7 +622,7 @@ class RAGGraphBuilder(BaseGraphBuilder):
             idx = np.array(idx)
 #             print(type(idx))
 #             print("new new idx:{}".format(idx))
-            if idx.shape[0] != 0:    #可能存在没有的情况
+            if idx.shape[0] != 0:    
                 adjacency[instance_id, idx] = 1
 #         print(adjacency)
 

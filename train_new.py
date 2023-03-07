@@ -76,7 +76,7 @@ def get_train_val(train_slide,val_slide,test_slide,label_path):
 
     for index in train_slide:
         train_slidename.append(index)
-        train_label_censorship.append(label[index]['censorship'])   #生存状态
+        train_label_censorship.append(label[index]['censorship'])   
         train_label_survtime.append(label[index]['surv_time'])
 
     for index1 in val_slide:
@@ -110,16 +110,16 @@ def eval_model(model,test_slide,test_label_surv_type,test_label_time,batch_size,
         total_loss_for_test = 0
         # batch_id = 0 
         test_num = len(test_slide)
-        # 数据分batch
+        # batch divide
         iter_num =  test_num //  batch_size +  1
 
-        # 遍历batch
+        # batch
         for batch_iter in range(iter_num):
             outs = torch.Tensor().to(device)
             labels_surv_type = torch.Tensor().to(device)
             labels_time = torch.Tensor().to(device)
             
-            if (batch_iter + 1) == iter_num:  # 最后一批数据
+            if (batch_iter + 1) == iter_num:  # last batch
                 for sample_index in range(batch_iter * batch_size, test_num):
 #                     print("Sample Index: ", sample_index)
                     
@@ -130,12 +130,12 @@ def eval_model(model,test_slide,test_label_surv_type,test_label_time,batch_size,
                     label_time = torch.tensor(test_label_time[sample_index]).unsqueeze(0).to(device)
                     
                     cluster_info = torch.load(os.path.join(args.cluster_info_path,slidename+'.pth'))
-                    # 输出模型进行训练
+                    # model train
                     output = model(pyg_data,cluster_info)
                     atten = model.get_attention_weights()
-                    average_atten = torch.mean(atten[0],dim=1)   #第一层attention输出的attentionscore,对num_head求平均
+                    average_atten = torch.mean(atten[0],dim=1)   #record attention score
                     atten_dict[label_time[0]] = average_atten[0]
-                    # 保存batch的输出和标签
+                    # save output and label to calculate loss
                     if outs.shape[0] == 0:
                         outs = output
                     else:
@@ -151,7 +151,7 @@ def eval_model(model,test_slide,test_label_surv_type,test_label_time,batch_size,
                     else:
                         labels_time = torch.cat((labels_time, label_time),dim=0)
                     
-                    # 保存所有训练样本的输出和标签
+                    # save all samples results
                     
                     if t_out_pre.shape[0] == 0:
                         t_out_pre = -1 * output
@@ -167,7 +167,7 @@ def eval_model(model,test_slide,test_label_surv_type,test_label_time,batch_size,
                         t_labelall_time = label_time
                     else:
                         t_labelall_time = torch.cat((t_labelall_time, label_time), dim=0)
-                    # 计算批损失
+                    # calculate loss of the batch
                 if torch.sum(labels_surv_type) > 0.0:
                     print("outs.shape:",outs.shape,"labels_time.shape:",labels_time.shape)                  
                     loss = _neg_partial_log(outs,labels_time,labels_surv_type)
@@ -177,12 +177,12 @@ def eval_model(model,test_slide,test_label_surv_type,test_label_time,batch_size,
                     print("Batch Avg Loss: {:.4f}", loss.item())
                     
             else:
-                # 遍历每一批样本
+                # batch
                 for batch_index in range(batch_size):
                     index = batch_iter * batch_size + batch_index
 #                     print("Sample Index: ", index)
                     
-                    # 读取样本数据 - 生存类型 -生存时间
+                    # acquire dat and label
                     slidename = test_slide[index]
                     pyg_data = torch.load(os.path.join(args.pyg_path,slidename+'.pt')).to(device)
                     print(pyg_data)
@@ -190,12 +190,12 @@ def eval_model(model,test_slide,test_label_surv_type,test_label_time,batch_size,
                     label_time = torch.tensor(test_label_time[index]).unsqueeze(0).to(device)
                     
                     cluster_info = torch.load(os.path.join(args.cluster_info_path,slidename+'.pth'))
-                    # 输出模型进行训练
+                    # model train
                     output = model(pyg_data,cluster_info)
                     atten = model.get_attention_weights()
-                    average_atten = torch.mean(atten[0],dim=1)   #第一层attention输出的attentionscore,对num_head求平均
+                    average_atten = torch.mean(atten[0],dim=1)   
                     atten_dict[label_time[0]] = average_atten[0]
-                    # 保存batch的输出和标签
+                    # save the output and label
                     if outs.shape[0] == 0:
                         outs = output
                     else:
@@ -211,7 +211,7 @@ def eval_model(model,test_slide,test_label_surv_type,test_label_time,batch_size,
                     else:
                         labels_time = torch.cat((labels_time, label_time),dim=0)
                     
-                    # 保存所有训练样本的输出和标签
+                    # save all samples results
                     
                     if t_out_pre.shape[0] == 0:
                         t_out_pre = -1 * output
@@ -227,7 +227,7 @@ def eval_model(model,test_slide,test_label_surv_type,test_label_time,batch_size,
                         t_labelall_time = label_time
                     else:
                         t_labelall_time = torch.cat((t_labelall_time, label_time), dim=0)
-                    # 计算批损失
+                    #compute the loss
                 if torch.sum(labels_surv_type) > 0.0:
                     print("outs.shape:",outs.shape,"labels_time.shape:",labels_time.shape)
 
@@ -259,7 +259,7 @@ def train_model(n_epochs,model,optimizer,scheduler,train_slide,val_slide,test_sl
     n_out_features = 1
     n_classes = [1]*n_out_features
     for epoch in range(n_epochs):
-        model.train()   #启用batch normalization和drop out  ，使用dropout避免过拟合，故不能和验证集、测试集用一个模块进行预测
+        model.train()   
 #                 pbar.set_description("RepeatNum:{}/{} Seed:{} Fold:{}/{}".format(repeat_num_temp + 1,repeat_num,seed,fold_num,all_fold_num))
         total_loss_for_train = 0
         batch_id = 0
@@ -274,16 +274,14 @@ def train_model(n_epochs,model,optimizer,scheduler,train_slide,val_slide,test_sl
         print("train_slide Num: ",len(train_slide))
         
         
-        # 数据分batch
         iter_num =  train_num //  batch_size +  1
                 
-        # 遍历batch
         for batch_iter in range(iter_num):
             outs = torch.Tensor().to(device)
             labels_surv_type = torch.Tensor().to(device)
             labels_time = torch.Tensor().to(device)
             
-            if (batch_iter + 1) == iter_num:  # 最后一批数据
+            if (batch_iter + 1) == iter_num:  
                 for sample_index in range(batch_iter * batch_size, train_num):
 #                     print("Sample Index: ", sample_index)
                     
@@ -294,10 +292,9 @@ def train_model(n_epochs,model,optimizer,scheduler,train_slide,val_slide,test_sl
                     label_time = torch.tensor(train_label_survtime[sample_index]).unsqueeze(0).to(device)
                     
                     cluster_info = torch.load(os.path.join(args.cluster_info_path,slidename+'.pth'))
-                    # 输出模型进行训练
+
                     output = model(pyg_data,cluster_info)
-                    
-                    # 保存batch的输出和标签
+
                     if outs.shape[0] == 0:
                         outs = output
                     else:
@@ -313,7 +310,6 @@ def train_model(n_epochs,model,optimizer,scheduler,train_slide,val_slide,test_sl
                     else:
                         labels_time = torch.cat((labels_time, label_time),dim=0)
                     
-                    # 保存所有训练样本的输出和标签
                     
                     if out_pre.shape[0] == 0:
                         out_pre = -1 * output
@@ -329,7 +325,7 @@ def train_model(n_epochs,model,optimizer,scheduler,train_slide,val_slide,test_sl
                         labelall_time = label_time
                     else:
                         labelall_time = torch.cat((labelall_time, label_time), dim=0)
-                    # 计算批损失
+
                 if torch.sum(labels_surv_type) > 0.0:
                     # print("outs.shape:",outs.shape,"labels_time.shape:",labels_time.shape)
 
@@ -343,12 +339,11 @@ def train_model(n_epochs,model,optimizer,scheduler,train_slide,val_slide,test_sl
                     # print("Batch Avg Loss: {:.4f}", loss.item())
                     
             else:
-                # 遍历每一批样本
+
                 for batch_index in range(batch_size):
                     index = batch_iter * batch_size + batch_index
 #                     print("Sample Index: ", index)
-                    
-                    # 读取样本数据 - 生存类型 -生存时间
+
                     slidename = train_slide[index]
                     pyg_data = torch.load(os.path.join(args.pyg_path,slidename+'.pt')).to(device)
                     print(pyg_data)
@@ -356,10 +351,9 @@ def train_model(n_epochs,model,optimizer,scheduler,train_slide,val_slide,test_sl
                     label_time = torch.tensor(train_label_survtime[index]).unsqueeze(0).to(device)
                     
                     cluster_info = torch.load(os.path.join(args.cluster_info_path,slidename+'.pth'))
-                    # 输出模型进行训练
+
                     output = model(pyg_data,cluster_info)
                     
-                    # 保存batch的输出和标签
                     if outs.shape[0] == 0:
                         outs = output
                     else:
@@ -375,7 +369,6 @@ def train_model(n_epochs,model,optimizer,scheduler,train_slide,val_slide,test_sl
                     else:
                         labels_time = torch.cat((labels_time, label_time),dim=0)
                     
-                    # 保存所有训练样本的输出和标签
                     
                     if out_pre.shape[0] == 0:
                         out_pre = -1 * output
@@ -391,7 +384,7 @@ def train_model(n_epochs,model,optimizer,scheduler,train_slide,val_slide,test_sl
                         labelall_time = label_time
                     else:
                         labelall_time = torch.cat((labelall_time, label_time), dim=0)
-                    # 计算批损失
+
                 if torch.sum(labels_surv_type) > 0.0:
                     # print("outs.shape:",outs.shape,"labels_time.shape:",labels_time.shape)
 
@@ -406,10 +399,8 @@ def train_model(n_epochs,model,optimizer,scheduler,train_slide,val_slide,test_sl
                     
                     
                     
-        # 计算训练集的ci指数
         c_idx_for_train = ci(labelall_time.data.cpu(),out_pre.data.cpu(),labelall_surv_type.data.cpu())
         
-        # Epoch平均损失
         epoch_loss = total_loss_for_train / iter_num
         
         print("Epoch [{}/{}], epoch_loss {:.4f}".format(epoch+1,n_epochs, epoch_loss))                    
@@ -480,7 +471,7 @@ def main(args):
     fold_train = 'fold_'+str(fold_num)+'_train'
     fold_val = 'fold_'+str(fold_num)+'_val'
     fold_test = 'fold_'+str(fold_num)+'_test'
-    train_slide = split_dict[fold_train]   #对应的slidename
+    train_slide = split_dict[fold_train]  
     val_slide = split_dict[fold_val]
     test_slide = split_dict[fold_test]
     setup_seed(seed)
@@ -516,7 +507,7 @@ def main(args):
 
 
 def get_params():
-    parser = argparse.ArgumentParser(description='mae-pretrain')
+    parser = argparse.ArgumentParser(description='model training')
 
     parser.add_argument('--label_path',type=str, default='/data12/yanhe/miccai/data/tcga_kirc/slide_label.pt')
     parser.add_argument('--split_dict_path',type=str, default='/data12/yanhe/miccai/data/tcga_kirc/train_val_test_split_random1.pkl')

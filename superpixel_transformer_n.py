@@ -32,11 +32,6 @@ except ImportError:
         assert condition, message
 
 
-
-#设置全局变量 模型输入值为训练所需的wsi的名字
-# superpixel_graph_path = '/data13/yanhe/miccai/graph_file/tcga_lihc_all/superpixel_num_700'     #超像素划分信息
-# inter_graph_path = '/data13/yanhe/miccai/super_pixel/graph_file/tcga_lihc_all/superpixel_num_700'   #超像素对应的inter-graph的dgl信息
-# cluster_info_path = '/data13/yanhe/miccai/codebook/cluster_info/tcga_lihc_all/superpixel700_cluster16/all_fold'   #超像素对应的聚类信息
 def reset(nn):
     def _reset(item):
         if hasattr(item, 'reset_parameters'):
@@ -65,13 +60,13 @@ class my_GlobalAttention(torch.nn.Module):
     def forward(self, x, batch, size=None):
         """"""
         x = x.unsqueeze(-1) if x.dim() == 1 else x
-        size = batch.max().item() + 1 if size is None else size   #修改了size的计算方法
+        size = batch.max().item() + 1 if size is None else size   #modified
         
         gate = self.gate_nn(x).view(-1, 1)
         x = self.nn(x) if self.nn is not None else x
         assert gate.dim() == x.dim() and gate.size(0) == x.size(0)
 
-        gate = softmax(gate, batch, num_nodes=size)   #batch即为index参数，softmax的时候会在index相同的值的内部进行计算
+        gate = softmax(gate, batch, num_nodes=size)   
         out = scatter_add(gate * x, batch, dim=0, dim_size=size)
 
         return out
@@ -131,7 +126,7 @@ class Intra_GCN(nn.Module):
 #         batch = torch.zeros(len(x),dtype=torch.long).to(device)
         batch = data.superpixel_attri.to(device)
         x = self.mpool(x,batch)
-        print('fea dim is {}'.format(x.shape))
+        # print('fea dim is {}'.format(x.shape))
         # print(x)
         
         fea = x
@@ -174,7 +169,7 @@ class Inter_GCN(nn.Module):
     def forward(self,data,feature):
         x=feature
         edge_index = data.edge_superpixel
-        print(x.shape)
+        # print(x.shape)
         x = self.norm(x)
         x = self.conv1(x,edge_index)
         x = self.relu(x)  
@@ -219,7 +214,7 @@ class VisionTransformer(timm.models.vision_transformer.VisionTransformer):
         use_fc_norm = global_pool == 'avg' if fc_norm is None else fc_norm
         self.fc_norm = norm_layer(embed_dim) if use_fc_norm else nn.Identity()
         dpr = [x.item() for x in torch.linspace(0, drop_path_rate, depth)] 
-        #可以导出attention score的block
+        
         self.blocks = nn.Sequential(*[
             Block(
                 dim=embed_dim,
@@ -272,7 +267,7 @@ class VisionTransformer(timm.models.vision_transformer.VisionTransformer):
 
     def forward_head(self, x, pre_logits: bool = False):
         if self.global_pool:
-            x = x[:, self.num_prefix_tokens:].mean(dim=1) if self.global_pool == 'avg' else x[:, 0]   #只取token去计算风险值
+            x = x[:, self.num_prefix_tokens:].mean(dim=1) if self.global_pool == 'avg' else x[:, 0]   #token
         x = self.fc_norm(x)
         return x if pre_logits else self.head(x)
 
@@ -419,13 +414,13 @@ class Superpixel_Vit(nn.Module):
         superpixels_fea = self.superpixel_graph(data)
         #final-fea
         if self.final_fea_type == 'mean':
-            fea = self.mean_feature(superpixels_fea,cluster_info) #【16，1024】大小
+            fea = self.mean_feature(superpixels_fea,cluster_info) #[16，1024]
         elif self.final_fea_type == 'max':
             fea = self.max_feature(superpixels_fea,cluster_info)
-        fea = fea.unsqueeze(0)  #[1,16,1024]大小
+        fea = fea.unsqueeze(0)  #[1,16,1024]
         # print(fea.shape)
         # print(fea.shape)
-        #输入vit模型
+        #vit
         fea = fea.float()
         out = self.vit(fea)
         return out

@@ -515,18 +515,18 @@ def get_params():
     parser.add_argument('--cluster_info_path',type=str, default='/data14/yanhe/miccai/codebook/cluster_info/tcga_kirc/superpixel600_cluster16/all_fold' )
     parser.add_argument('--vw_num',type=int, default=16)
     parser.add_argument('--feat_dim',type =int,default=1024)
-    parser.add_argument('--depth',type=int,default=1)   #transformer block的深度
+    parser.add_argument('--depth',type=int,default=1)   
     parser.add_argument('--num_heads',type=int,default=4)
-    parser.add_argument('--mpool_intra',type=str,default='global_mean_pool') #可选‘global_mean_pool’,'global_max_pool','global_att_pool'
+    parser.add_argument('--mpool_intra',type=str,default='global_mean_pool') #‘global_mean_pool’,'global_max_pool','global_att_pool'
     parser.add_argument('--mpool_inter',type=str,default='global_mean_pool')
-    parser.add_argument('--gnn_intra',type=str,default='sage') #可选'sage''gcn''gat''leconv''graphconv'
+    parser.add_argument('--gnn_intra',type=str,default='sage') #'sage''gcn''gat''leconv''graphconv'
     parser.add_argument('--gnn_inter',type=str,default='sage')
     parser.add_argument('--in_feats_intra',type=int, default=1024)
     parser.add_argument('--n_hidden_intra',type=int, default=1024)
     parser.add_argument('--out_feats_intra',type=int,default=1024)
-    parser.add_argument('--in_feats_inter',type=int,default=1024)   #in_feats_inter与out_feats_intra的值要保持一致
+    parser.add_argument('--in_feats_inter',type=int,default=1024)   #in_feats_inter=out_feats_intra
     parser.add_argument('--n_hidden_inter',type=int, default=1024)
-    parser.add_argument('--out_feats_inter',type=int,default=1024)  #out_feats_inter与feat_dim的值要保持一致
+    parser.add_argument('--out_feats_inter',type=int,default=1024)  #out_feats_inter=feat_dim
     parser.add_argument('--final_fea_type',type=str,default='mean')
     parser.add_argument('--epochs', type=int, default=30)
     parser.add_argument('--batch_size',type=int,default=16)

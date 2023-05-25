@@ -1,11 +1,11 @@
 ## Multi-scope Analysis Driven Hierarchical Graph Transformer for Whole Slide Image based Cancer Survival Prediction
 
-<div align=left><img width="70%" src="./image/miccai_framework.png"/></div>
+<div align=left><img width="70%" src="./images/miccai_framework.png"/></div>
 
 ## Installation
 Clone the repo:
 ```bash
-git clone https://github.com/HeLongHuang/SHGNN && cd SHGNN
+git clone https://github.com/Baeksweety/HGTHGT  && cd HGTHGT
 ```
 Create a conda environment and activate it:
 ```bash

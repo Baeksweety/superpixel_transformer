@@ -1,6 +1,6 @@
 ## Multi-scope Analysis Driven Hierarchical Graph Transformer for Whole Slide Image based Cancer Survival Prediction
 
-<div align=left><img width="70%" src="./Pics/Overall.png"/></div>
+<div align=left><img width="70%" src="./image/miccai_framework.png"/></div>
 
 ## Installation
 Clone the repo:

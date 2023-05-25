@@ -1,4 +1,4 @@
-## Spatial-hierarchical Graph Neural Network with Dynamic Structure Learning for Histological Image Classification
+## Multi-scope Analysis Driven Hierarchical Graph Transformer for Whole Slide Image based Cancer Survival Prediction
 
 <div align=left><img width="70%" src="./Pics/Overall.png"/></div>
 

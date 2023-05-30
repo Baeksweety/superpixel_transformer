@@ -44,6 +44,8 @@ First, setting the data path, data splits and hyperparameters in the file ***tra
 ```bash
 cd train
 python train.py
+or
+bash run.sh
 ```
 
 ## Saved models
